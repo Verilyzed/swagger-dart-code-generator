@@ -418,7 +418,7 @@ abstract class SwaggerModelsGenerator extends SwaggerGeneratorBase {
             className, parameterName, items, modelPostfix, null);
         return 'List<$typeName>';
       default:
-        return 'Map<String, dynamic>';
+        return 'Object';
     }
   }
 
