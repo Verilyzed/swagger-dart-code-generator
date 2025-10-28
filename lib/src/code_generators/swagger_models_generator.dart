@@ -418,7 +418,7 @@ abstract class SwaggerModelsGenerator extends SwaggerGeneratorBase {
             className, parameterName, items, modelPostfix, null);
         return 'List<$typeName>';
       default:
-        return 'Object';
+        return 'Map<String, dynamic>';
     }
   }
 
@@ -735,6 +735,10 @@ static $returnType $fromJsonFunction($valueType? value) => $enumNameCamelCase$fr
     required bool isDeprecated,
   }) {
     final anyOfSchemas = prop.anyOf;
+
+    if (className == 'EventSubscription') {
+      print('object');
+    }
 
     if (anyOfSchemas.isEmpty) {
       return generatePropertyContentByDefault(
