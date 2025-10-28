@@ -781,7 +781,7 @@ static $returnType $fromJsonFunction($valueType? value) => $enumNameCamelCase$fr
       resolvedSchemaForDetails = SwaggerSchema(type: kObject);
     }
 
-    String finalTypeName = getValidatedClassName(baseTypeName);
+    String finalTypeName = baseTypeName; // getValidatedClassName(baseTypeName);
     bool makeTypeNullable = isExplicitlyNullableInAnyOf;
 
     if (!requiredProperties.contains(propertyKey)) {
@@ -832,7 +832,7 @@ static $returnType $fromJsonFunction($valueType? value) => $enumNameCamelCase$fr
         !kBasicTypesMap.containsKey(baseTypeName.replaceAll('?', '')) &&
         !finalTypeNameWithoutNull.endsWith(options.modelPostfix)) {
       if (finalTypeName.endsWith('?')) {
-        finalTypeName = '${finalTypeNameWithoutNull}${options.modelPostfix}?';
+        finalTypeName = '$finalTypeNameWithoutNull${options.modelPostfix}?';
       } else {
         finalTypeName += options.modelPostfix;
       }
@@ -1420,6 +1420,19 @@ static $returnType $fromJsonFunction($valueType? value) => $enumNameCamelCase$fr
             propertyName: propertyName,
             basicTypesMap: basicTypesMap,
             requiredProperties: requiredProperties,
+          ),
+        );
+      } else if (prop.anyOf.isNotEmpty) {
+        results.add(
+          generatePropertyContentByAnyOf(
+            prop: prop,
+            allEnumListNames: allEnumListNames,
+            className: className,
+            allEnumNames: allEnumNames,
+            propertyKey: propertyKey,
+            propertyName: propertyName,
+            requiredProperties: requiredProperties,
+            isDeprecated: prop.deprecated,
           ),
         );
       } else if (prop.hasRef) {

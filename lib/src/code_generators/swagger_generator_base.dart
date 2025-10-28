@@ -19,7 +19,7 @@ abstract class SwaggerGeneratorBase {
       return className;
     }
 
-    if (exceptionWords.contains(className)) {
+    if (exceptionWords.any((e) => e == className)) {
       className = '\$$className';
     }
 
@@ -56,8 +56,8 @@ abstract class SwaggerGeneratorBase {
     }
 
     return result
-        .replaceFirst(options.cutFromModelNames, '')
-        .replaceAll('\$\$', '\$');
+      .replaceFirst(options.cutFromModelNames, '')
+      .replaceAll('\$\$', '\$');
   }
 
   String generateEnumName(String className, String enumName) {

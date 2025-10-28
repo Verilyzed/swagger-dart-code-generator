@@ -1,0 +1,47 @@
+openapi: "3.0.2"
+info:
+  title: CSS API
+  version: "0.1.0"
+servers:
+  - url: https://css-data-replica.fes1.kon.stage.markt.ekp.ewe.cloud/api/contract-connect
+    description: KON
+  - url: https://css-data-replica.fes1.prod.markt.ekp.ewe.cloud/api/contract-connect
+    description: PROD
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
+
+paths:
+  /verknuepfungen:
+    get:
+      description:
+        Liefert die Liste der Verknüpfungen zu einem MetaId Token
+      responses:
+        "200":
+          description: 'Liste der Verknüpfungen'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verknuepfungen:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        kundenNummer:
+                          type: number
+                        vertragsNummern:
+                          type: array
+                          items:
+                            type: number
+
+        "401":
+          description: Der Zugriff konnte nicht autorisiert werden

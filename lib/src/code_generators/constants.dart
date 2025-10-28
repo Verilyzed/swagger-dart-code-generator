@@ -18,6 +18,7 @@ const kBasicTypes = [
   'bool',
   'boolean',
   'num',
+  'dynamic',
   'Object',
   'String',
   kMap,
