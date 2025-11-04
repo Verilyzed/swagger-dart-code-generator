@@ -886,8 +886,34 @@ class SwaggerRequestsGenerator extends SwaggerGeneratorBase {
               ),
             );
           } else {
-            final typeName =
-                _mapParameterName(value.type, value.format, modelPostfix);
+            String typeName;
+            if (value.anyOf.length == 2) {
+              SwaggerSchema? schema = value.anyOf.first;
+
+              if (schema.type.toLowerCase() == 'null') {
+                schema = value.anyOf.last;
+              }
+
+              if (schema.hasRef) {
+                schema = root.allSchemas[schema.ref.getUnformattedRef()] ?? schema;
+              }
+
+              if (schema.isEnum) {
+                if (schema.title.isNotEmpty) {
+                  typeName = getValidatedClassName(schema.title).asEnum();
+                } else {
+                  typeName = _getEnumParameterTypeName(
+                    parameterName: key,
+                    path: path,
+                    requestType: requestType,
+                  );
+                }
+              } else {
+                typeName = _mapParameterName(schema.type, schema.format, modelPostfix);
+              }
+            } else {
+              typeName = _mapParameterName(value.type, value.format, modelPostfix);
+            }
 
             result.add(
               Parameter(

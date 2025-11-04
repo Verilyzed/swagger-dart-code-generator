@@ -1,0 +1,25 @@
+{
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.compile.nullAnalysis.mode": "automatic",
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+        "pubspec.yaml": "app.iml, .flutter-plugins, .packages, .dart_tool, .flutter-plugins-dependencies, .metadata, .packages, pubspec.lock, build.yaml, pubspec_overrides.yaml, analysis_options.yaml, all_lint_rules.yaml, *.iml",
+        ".gitignore": ".gitattributes, .gitmodules, .gitmessage, .mailmap, .git-blame*,.gitignore",
+        "readme.*": "authors, backers.md, changelog*, citation*, code_of_conduct.md, codeowners, contributing.md, contributors, copying, credits, governance.md, history.md, license*, maintainers, readme*, security.md, sponsors.md",
+        "*.dart": "$(capture).g.dart, $(capture).freezed.dart,$(capture).chopper.dart",
+        ".env": ".env.dev, .env.sandbox, .env.mock, .env.staging",
+        ".env.template": ".env.dev.template, .env.sandbox.template, .env.mock.template, .env.staging.template",
+        "mason.yaml": "mason-lock.json",
+        "main.dart": "main_*.dart",
+    },
+    "[dart]": {
+        "editor.defaultFormatter": "Dart-Code.dart-code",
+        "editor.formatOnSave": false,
+        "editor.wordWrap": "off",
+    },
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit",
+        "source.organizeImports": "explicit"
+    },
+    "editor.wordWrap": "off",
+}
