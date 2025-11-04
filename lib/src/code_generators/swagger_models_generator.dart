@@ -388,6 +388,20 @@ abstract class SwaggerModelsGenerator extends SwaggerGeneratorBase {
       return parameter.ref.split('/').last.pascalCase;
     }
 
+    if (parameter.oneOf.isNotEmpty) {
+      if (parameter.oneOf.length == 2) {
+        if (parameter.oneOf.any((e) => e.type.toLowerCase() == 'null')) {
+          final nonNullSchema =
+              parameter.oneOf.firstWhere((e) => e.type.toLowerCase() != 'null');
+
+          return getParameterTypeName(
+              className, parameterName, nonNullSchema, modelPostfix, null);
+        }
+      }
+
+      return 'Object';
+    }
+
     switch (parameter.type) {
       case 'integer':
       case 'int':
@@ -1086,7 +1100,11 @@ static $returnType $fromJsonFunction($valueType? value) => $enumNameCamelCase$fr
 
     var typeName = '';
     if (items != null) {
-      typeName = getValidatedClassName(items.originalRef);
+      if (items.anyOf.length > 1) {
+        typeName = kObject;
+      } else {
+        typeName = getValidatedClassName(items.originalRef);
+      }
 
       if (typeName.isNotEmpty &&
           !kBasicTypes.contains(typeName.toLowerCase())) {
@@ -1396,6 +1414,10 @@ static $returnType $fromJsonFunction($valueType? value) => $enumNameCamelCase$fr
       }
 
       propertyName = getParameterName(propertyName, propertyNames);
+
+       if (className == 'EventSubscription') {
+        print('object');
+      }
 
       propertyNames.add(propertyName);
       if (prop.type.isNotEmpty) {
