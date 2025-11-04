@@ -1415,10 +1415,6 @@ static $returnType $fromJsonFunction($valueType? value) => $enumNameCamelCase$fr
 
       propertyName = getParameterName(propertyName, propertyNames);
 
-       if (className == 'EventSubscription') {
-        print('object');
-      }
-
       propertyNames.add(propertyName);
       if (prop.type.isNotEmpty) {
         results.add(generatePropertyContentByType(
