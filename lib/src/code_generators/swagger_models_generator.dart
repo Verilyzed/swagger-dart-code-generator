@@ -770,7 +770,7 @@ static $returnType $fromJsonFunction($valueType? value) => $enumNameCamelCase$fr
     bool isExplicitlyNullableInAnyOf = false;
 
     for (final subSchema in anyOfSchemas) {
-      if (subSchema.type.toLowerCase() == 'null') {
+      if (subSchema.type.toLowerCase() == 'null' || subSchema.isNullable == true) {
         isExplicitlyNullableInAnyOf = true;
       } else {
         nonNullSchemas.add(subSchema);
