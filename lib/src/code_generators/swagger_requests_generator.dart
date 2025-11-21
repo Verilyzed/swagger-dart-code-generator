@@ -1367,6 +1367,38 @@ class SwaggerRequestsGenerator extends SwaggerGeneratorBase {
       return kBasicTypesMap[contentSchemaType];
     }
 
+    if (content.schema?.anyOf.isNotEmpty == true) {
+      final nonNullSchemas = <SwaggerSchema>[];
+      bool hasNullSchema = false;
+
+      for (final anyOfSchema in content.schema!.anyOf) {
+        if (anyOfSchema.type.toLowerCase() == 'null' || anyOfSchema.isNullable == true) {
+          hasNullSchema = true;
+        } else {
+          nonNullSchemas.add(anyOfSchema);
+        }
+      }
+      
+      if (nonNullSchemas.length == 1) {
+        String typeName;
+
+        final schema = nonNullSchemas.first;
+
+        if (schema.hasRef) {
+          typeName = getValidatedClassName(schema.ref.getRef());
+        } else {
+          typeName = _mapParameterName(
+              schema.type, schema.format, modelPostfix);
+        }
+
+        if (hasNullSchema) {
+          typeName = typeName.makeNullable();
+        }
+
+        return typeName;
+      }
+    }
+
     if (responseType.isEmpty) {
       return '';
     }
