@@ -366,6 +366,17 @@ class SwaggerRequestsGenerator extends SwaggerGeneratorBase {
       } else if (successResponse.content?.schema?.allOf.isNotEmpty == true &&
           successResponse.content?.schema?.title.isNotEmpty == true) {
         results.add(response);
+      } else if (successResponse.content?.schema?.anyOf.isNotEmpty == true) {
+        for (final anyOfSchema in successResponse.content!.schema!.anyOf) {
+          if (anyOfSchema.hasRef) {
+            final typeName =
+                getValidatedClassName(anyOfSchema.ref.getRef()).withPostfix(options.modelPostfix);
+            if (_isValidModelName(typeName)) {
+              results.add(typeName);
+            }
+            break;
+          }
+        }
       }
     }
 
@@ -836,7 +847,34 @@ class SwaggerRequestsGenerator extends SwaggerGeneratorBase {
               ),
             );
           } else {
-            final typeName = _mapParameterName(value.type, value.format, modelPostfix);
+            String typeName;
+            if (value.anyOf.length == 2) {
+              SwaggerSchema? anyOfSchema = value.anyOf.first;
+
+              if (anyOfSchema.type.toLowerCase() == 'null') {
+                anyOfSchema = value.anyOf.last;
+              }
+
+              if (anyOfSchema.hasRef) {
+                anyOfSchema = root.allSchemas[anyOfSchema.ref.getUnformattedRef()] ?? anyOfSchema;
+              }
+
+              if (anyOfSchema.isEnum) {
+                if (anyOfSchema.title.isNotEmpty) {
+                  typeName = getValidatedClassName(anyOfSchema.title).asEnum();
+                } else {
+                  typeName = _getEnumParameterTypeName(
+                    parameterName: key,
+                    path: path,
+                    requestType: requestType,
+                  );
+                }
+              } else {
+                typeName = _mapParameterName(anyOfSchema.type, anyOfSchema.format, modelPostfix);
+              }
+            } else {
+              typeName = _mapParameterName(value.type, value.format, modelPostfix);
+            }
 
             result.add(
               Parameter(
@@ -1188,6 +1226,25 @@ class SwaggerRequestsGenerator extends SwaggerGeneratorBase {
         contentSchema.allOf.isNotEmpty == true &&
         contentSchema.title.isNotEmpty) {
       return contentSchema.title;
+    }
+
+    if (contentSchema != null && contentSchema.anyOf.isNotEmpty) {
+      for (final anyOfSchema in contentSchema.anyOf) {
+        if (anyOfSchema.hasRef) {
+          var typeName =
+              getValidatedClassName(anyOfSchema.ref.getRef()).withPostfix(modelPostfix);
+          if (contentSchema.shouldBeNullable) {
+            typeName = typeName.makeNullable();
+          }
+          return typeName;
+        }
+        if (anyOfSchema.type.isNotEmpty && anyOfSchema.type.toLowerCase() != 'null') {
+          final mapped = kBasicTypesMap[anyOfSchema.type];
+          if (mapped != null) {
+            return contentSchema.shouldBeNullable ? mapped.makeNullable() : mapped;
+          }
+        }
+      }
     }
 
     final schemaRef = content.schema?.ref ?? '';
