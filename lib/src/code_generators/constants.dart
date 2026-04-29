@@ -53,6 +53,7 @@ const kPath = 'path';
 const kOptionalBody = 'optionalBody';
 const kFormData = 'formData';
 const kMultipart = 'multipart';
+const kIncludeNullQueryVars = 'includeNullQueryVars';
 const kDateTimeFormat = 'date-time';
 const kFactoryConverter = 'factoryConverter';
 const kDeprecatedAnnotation = '@deprecated';
@@ -106,3 +107,6 @@ const kServiceHeader = '''
 // SwaggerChopperGenerator
 // **************************************************************************
   ''';
+
+const kSwaggerMetaData = 'SwaggerMetaData';
+const kSwaggerMetaDataParameter = 'swaggerMetaData';
