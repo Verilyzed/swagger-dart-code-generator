@@ -680,8 +680,33 @@ class SwaggerRequestsGenerator extends SwaggerGeneratorBase {
     } else if (parameter.schema?.type == kArray &&
         parameter.schema?.items?.type.isNotEmpty == true) {
       return _mapParameterName(parameter.schema!.items!.type, format, '').asList();
-    } else if (parameter.schema?.anyOf.firstOrNull?.type.isNotEmpty == true) {
-      return _mapParameterName(parameter.schema!.anyOf.first.type, format, '');
+    } else if (parameter.schema?.anyOf.isNotEmpty == true) {
+      final anyOf = parameter.schema!.anyOf;
+
+      // OpenAPI 3.1 nullable pattern: anyOf of the real type and {type: null}.
+      // Pick the non-null branch and resolve it like a regular schema.
+      final anyOfSchema = anyOf.firstWhere(
+        (schema) => schema.type.toLowerCase() != 'null',
+        orElse: () => anyOf.first,
+      );
+
+      if (anyOfSchema.hasRef) {
+        final ref = anyOfSchema.ref.getUnformattedRef();
+
+        if (_isEnumRef(ref, root)) {
+          return anyOfSchema.ref.getRef().asEnum();
+        }
+
+        return anyOfSchema.ref.getRef() + modelPostfix;
+      }
+
+      if (anyOfSchema.type.isNotEmpty) {
+        return _mapParameterName(
+          anyOfSchema.type,
+          anyOfSchema.format.isNotEmpty ? anyOfSchema.format : format,
+          '',
+        );
+      }
     }
 
     if (parameter.type.isNotEmpty) {
