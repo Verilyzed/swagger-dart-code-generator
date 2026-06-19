@@ -12,11 +12,10 @@ List<String> exceptionWords = <String>[
   'throw',
   'assert',
   'deferred',
-  'finnaly',
+  'finally',
   'operator',
   'true',
   'async',
-  'dynamic',
   'get',
   'rethrow',
   'typedef',
@@ -55,7 +54,6 @@ List<String> exceptionWords = <String>[
   'try',
   'client',
   'hashCode',
+  'value',
   'override',
 ];
-
-List<String> exceptionWordsInEnum = <String>[...exceptionWords, 'value'];

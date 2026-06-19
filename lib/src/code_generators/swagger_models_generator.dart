@@ -422,6 +422,20 @@ abstract class SwaggerModelsGenerator extends SwaggerGeneratorBase {
       return parameter.ref.split('/').last.pascalCase;
     }
 
+    if (parameter.oneOf.isNotEmpty) {
+      if (parameter.oneOf.length == 2) {
+        if (parameter.oneOf.any((e) => e.type.toLowerCase() == 'null')) {
+          final nonNullSchema =
+              parameter.oneOf.firstWhere((e) => e.type.toLowerCase() != 'null');
+
+          return getParameterTypeName(
+              className, parameterName, nonNullSchema, modelPostfix, null);
+        }
+      }
+
+      return 'Object';
+    }
+
     switch (parameter.type) {
       case 'integer':
       case 'int':
@@ -799,7 +813,7 @@ static $returnType $fromJsonFunction($valueType? value) => $enumNameCamelCase$fr
     bool isExplicitlyNullableInAnyOf = false;
 
     for (final subSchema in anyOfSchemas) {
-      if (subSchema.type.toLowerCase() == 'null') {
+      if (subSchema.type.toLowerCase() == 'null' || subSchema.isNullable == true) {
         isExplicitlyNullableInAnyOf = true;
       } else {
         nonNullSchemas.add(subSchema);
@@ -828,7 +842,7 @@ static $returnType $fromJsonFunction($valueType? value) => $enumNameCamelCase$fr
       resolvedSchemaForDetails = SwaggerSchema(type: kObject);
     }
 
-    String finalTypeName = getValidatedClassName(baseTypeName);
+    String finalTypeName = baseTypeName; // getValidatedClassName(baseTypeName);
     bool makeTypeNullable = isExplicitlyNullableInAnyOf;
 
     if (!requiredProperties.contains(propertyKey)) {
@@ -839,16 +853,11 @@ static $returnType $fromJsonFunction($valueType? value) => $enumNameCamelCase$fr
     // so for method naming, we need the base name without '?'.
     String typeNameForMethodGeneration = finalTypeName;
     if (typeNameForMethodGeneration.endsWith('?')) {
-      typeNameForMethodGeneration = typeNameForMethodGeneration.substring(
-        0,
-        typeNameForMethodGeneration.length - 1,
-      );
+      typeNameForMethodGeneration = typeNameForMethodGeneration.substring(0, typeNameForMethodGeneration.length - 1);
     }
 
     if (finalTypeName != kDynamic &&
-        (prop.shouldBeNullable ||
-            options.nullableModels.contains(finalTypeName.replaceAll('?', '')))) {
-      // Ensure to check without '?' for nullableModels
+        (prop.shouldBeNullable || options.nullableModels.contains(finalTypeName.replaceAll('?', '')))) { // Ensure to check without '?' for nullableModels
       makeTypeNullable = true;
     }
 
@@ -872,10 +881,10 @@ static $returnType $fromJsonFunction($valueType? value) => $enumNameCamelCase$fr
         }
       }
       // Also update typeNameForMethodGeneration to include 'enums.' prefix if it's an enum
-      if (!typeNameForMethodGeneration.startsWith('enums.') &&
-          allEnumNames.contains(typeNameForMethodGeneration)) {
+      if (!typeNameForMethodGeneration.startsWith('enums.') && allEnumNames.contains(typeNameForMethodGeneration) ) {
         typeNameForMethodGeneration = 'enums.$typeNameForMethodGeneration';
       }
+
     } else if (baseTypeName != kDynamic &&
         !kBasicTypesMap.containsKey(baseTypeName.replaceAll('?', '')) &&
         !finalTypeNameWithoutNull.endsWith(options.modelPostfix)) {
@@ -885,8 +894,7 @@ static $returnType $fromJsonFunction($valueType? value) => $enumNameCamelCase$fr
         finalTypeName += options.modelPostfix;
       }
       // Update typeNameForMethodGeneration if it's not a basic type and needs a postfix
-      if (!kBasicTypesMap.containsKey(typeNameForMethodGeneration) &&
-          !typeNameForMethodGeneration.endsWith(options.modelPostfix)) {
+      if (!kBasicTypesMap.containsKey(typeNameForMethodGeneration) && !typeNameForMethodGeneration.endsWith(options.modelPostfix)) {
         typeNameForMethodGeneration += options.modelPostfix;
       }
     }
@@ -1145,7 +1153,11 @@ static $returnType $fromJsonFunction($valueType? value) => $enumNameCamelCase$fr
 
     var typeName = '';
     if (items != null) {
-      typeName = getValidatedClassName(items.originalRef);
+      if (items.anyOf.length > 1) {
+        typeName = kObject;
+      } else {
+        typeName = getValidatedClassName(items.originalRef);
+      }
 
       if (typeName.isNotEmpty && !kBasicTypes.contains(typeName.toLowerCase())) {
         typeName += options.modelPostfix;

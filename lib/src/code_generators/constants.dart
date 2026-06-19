@@ -18,12 +18,16 @@ const kBasicTypes = [
   'bool',
   'boolean',
   'num',
+  'dynamic',
   'Object',
   'String',
   kMap,
 ];
 
-const kBasicSwaggerTypes = [...kBasicTypes, 'number'];
+const kBasicSwaggerTypes = [
+  ...kBasicTypes,
+  'number',
+];
 
 const kMap = 'Map';
 const kMapStringDynamic = 'Map<String,dynamic>';
@@ -69,9 +73,9 @@ const kBasicTypesMap = <String, String>{
   'boolean': 'bool',
   'bool': 'bool',
   'string': 'String',
+  'file': 'List<int>',
   'number': 'num',
   'object': 'Object',
-  'file': 'List<int>',
   'num': 'num',
 };
 
