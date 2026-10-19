@@ -1,3 +1,9 @@
+# Unreleased
+
+* Fixed generated JSON converters returning raw strings or throwing for successful JSON `null` and empty responses while preserving response metadata.
+* JSON string responses are now decoded without JSON quotes for `application/json` and `+json` media types, including parameters. Non-string JSON requested as `String` retains its existing behavior.
+* Responses with non-JSON or missing `Content-Type` are not JSON-decoded, preserving literal `null`, quotes, and whitespace in non-empty text bodies.
+
 # 4.1.0
 
 * Updated dependencies
