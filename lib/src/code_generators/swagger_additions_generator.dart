@@ -51,11 +51,12 @@ final Map<Type, Object Function(Map<String, dynamic>)> $mappingVariableName = {}
   ) {
     final result = StringBuffer();
 
-    final chopperPartImport =
-        buildOnlyModels ? '' : "part '$swaggerFileName.swagger.chopper.dart';";
+    final chopperPartImport = buildOnlyModels
+        ? ''
+        : "part '$swaggerFileName.swagger.chopper.dart';";
 
-    final overridenModels = options.overridenModels
-            .any((e) => e.fileName == swaggerFileName)
+    final overridenModels =
+        options.overridenModels.any((e) => e.fileName == swaggerFileName)
         ? 'import \'${options.overridenModels.firstWhere((e) => e.fileName == swaggerFileName).importUrl}\';'
         : '';
 
@@ -73,8 +74,9 @@ import 'package:chopper/chopper.dart' as chopper;''';
         ? "import '$swaggerFileName.enums.swagger.dart' as enums;"
         : '';
 
-    final enumsExport =
-        hasEnums ? "export '$swaggerFileName.enums.swagger.dart';" : '';
+    final enumsExport = hasEnums
+        ? "export '$swaggerFileName.enums.swagger.dart';"
+        : '';
 
     result.writeln("""
 // coverage:ignore-file
@@ -207,14 +209,12 @@ class \$CustomJsonDecoder {
 class \$JsonSerializableConverter extends chopper.JsonConverter {
   @override
   FutureOr<chopper.Response<ResultType>> convertResponse<ResultType, Item>(chopper.Response response) async {
-    if (response.bodyString.isEmpty) {
-      // In rare cases, when let's say 204 (no content) is returned -
-      // we cannot decode the missing json with the result type specified
-      return chopper.Response(response.base, null, error: response.error);
-    }
-
-    if (ResultType == String) {
-      return response.copyWith();
+    final mediaType = response.headers['content-type']?.split(';').first.trim().toLowerCase();
+    final isJson = mediaType == 'application/json' || (mediaType?.endsWith('+json') ?? false);
+    final rawBody = response.bodyString.trim();
+    if (response.bodyString.isEmpty ||
+        (isJson && response.isSuccessful && (rawBody.isEmpty || rawBody == 'null'))) {
+      return chopper.Response<ResultType>(response.base, null, error: response.error);
     }
 
     if (ResultType == DateTime) {
@@ -223,9 +223,15 @@ class \$JsonSerializableConverter extends chopper.JsonConverter {
               as ResultType);
     }
 
-    final jsonRes = await super.convertResponse(response);
-    return jsonRes.copyWith<ResultType>(
-        body: \$jsonDecoder.decode<Item>(jsonRes.body) as ResultType);
+    final jsonRes = isJson
+        ? await super.convertResponse<dynamic, dynamic>(response)
+        : response;
+    final body = ResultType == String
+        ? (jsonRes.body is String ? jsonRes.body : response.body)
+        : \$jsonDecoder.decode<Item>(jsonRes.body);
+    return chopper.Response<ResultType>(
+        jsonRes.base, body as ResultType?,
+        error: jsonRes.error);
   }
 }
 

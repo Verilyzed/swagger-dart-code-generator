@@ -36,6 +36,7 @@ dependencies:
 
 dev_dependencies:
   build_runner: ^2.10.1
+  chopper: 8.4.0
   json_serializable: ^6.11.1
   remove_from_coverage: ^2.0.0
   test: ^1.26.3
